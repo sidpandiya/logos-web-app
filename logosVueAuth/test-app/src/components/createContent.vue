@@ -18,7 +18,12 @@
             <input type="text" id="articleTitle" class="form-control" v-model="newArticle.title">
           </div>
           <div id="findLocation">
-            <span id="locationFound">Finding Location</span>
+            <label for="articleLocation">
+              <gmap-autocomplete
+                @place_changed="setPlace">
+              </gmap-autocomplete> <span id="locationAutofill">Enter a location.</span>
+            </label>
+            <br/>
           </div>
           <gmap-map
             :center="center"
@@ -65,7 +70,7 @@
             <tr v-for="story in stories">
               <td>{{ story.title }}</td>
               <td>{{ story.author }}</td>
-              <td>{{ story.body }}</td>
+              <td v-html="story.body">{{  }}</td>
               <td>{{ story.location }}</td>
               <td>{{ story.dateAdded }}</td>
               <td>{{ story.viewCount }}</td>
@@ -109,7 +114,6 @@ var currentUser = "";
 var currentUserID = "";
 firebase.auth().onAuthStateChanged((function(user) {
   if (user) {
-    console.log(user.uid);
     currentUser = user.displayName;
     currentUserID = user.uid;
   } else {
@@ -149,12 +153,13 @@ export default {
   },
   methods: {
     postArticle: function(){
+      var location = document.getElementById("locationAutofill").innerHTML;
       var options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
       const now = new Date().toLocaleDateString('en-US', options);
       this.newArticle.dateAdded = now.toString();
       this.newArticle.author = currentUser;
       this.newArticle.authorID = currentUserID;
-      this.newArticle.location = document.getElementById("locationFound").innerHTML;
+      this.newArticle.location = location;
       storiesRef.push(this.newArticle);
       this.newArticle.title = '';
       this.newArticle.body = '';
@@ -168,6 +173,32 @@ export default {
     },
     setPlace(place) {
       this.currentPlace = place;
+      if (this.currentPlace) {
+        const marker = {
+          lat: this.currentPlace.geometry.location.lat(),
+          lng: this.currentPlace.geometry.location.lng()
+        };
+        this.center = marker;
+        this.currentPlace = null;
+      }
+      var geocoder = new google.maps.Geocoder();
+      var latlng = new google.maps.LatLng(this.center.lat, this.center.lng);
+
+      geocoder.geocode({'latLng': latlng}, function(results, status) {
+        var location = "";
+        // This is checking to see if the Geocode Status is OK before proceeding    
+        if (status == google.maps.GeocoderStatus.OK) {
+
+          //This is placing the marker at the returned address    
+          if (results[1]) {
+              location = (results[1].formatted_address);
+          }
+        }
+        document.getElementById("locationAutofill").innerHTML = location;
+      })
+    },
+    addMarker() {
+      
     },
     geolocate: function() {
       navigator.geolocation.getCurrentPosition(position => {
@@ -175,23 +206,7 @@ export default {
           lat: position.coords.latitude,
           lng: position.coords.longitude
         };
-        var geocoder = new google.maps.Geocoder();
-        var latlng = new google.maps.LatLng(this.center.lat, this.center.lng);
-
-        geocoder.geocode({'latLng': latlng}, function(results, status) {
-        var location = "";
-          // This is checking to see if the Geoeode Status is OK before proceeding    
-          if (status == google.maps.GeocoderStatus.OK) {
-
-            //This is placing the marker at the returned address    
-            if (results[1]) {
-                location = (results[1].formatted_address);
-            }
-          }
-          document.getElementById("locationFound").innerHTML = location;
-        })
       });
-
     }
   } 
 }
