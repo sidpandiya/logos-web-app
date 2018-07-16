@@ -17,6 +17,7 @@
     "vue": "^2.5.11",
     "vue-browser-geolocation": "^1.2.0",
     "vue-router": "^3.0.1",
+    "vue2-editor": "^2.5.0",
     "vue2-google-maps": "^0.10.0",
     "vuefire": "^1.4.5"
   },
