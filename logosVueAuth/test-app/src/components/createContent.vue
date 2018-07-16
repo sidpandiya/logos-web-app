@@ -121,6 +121,17 @@ let db = app.database();
 let usersRef = db.ref('users');
 let storiesRef = db.ref('stories');
 
+var currentUser = "";
+var currentUserID = "";
+firebase.auth().onAuthStateChanged((function(user) {
+  if (user) {
+    console.log(user.uid);
+    currentUser = user.displayName;
+    currentUserID = user.uid;
+  } else {
+    // No user is signed in.
+  }
+}));
 
 export default {
   name: 'create',
@@ -133,6 +144,8 @@ export default {
           newArticle: {
             title: '',
             body: '',
+            author: '',
+            authorID: '',
             location: '',
             viewCount: 0,
             dateAdded: ''
@@ -152,12 +165,16 @@ export default {
       var options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
       const now = new Date().toLocaleDateString('en-US', options);
       this.newArticle.dateAdded = now.toString();
+      this.newArticle.author = currentUser;
+      this.newArticle.authorID = currentUserID;
       this.newArticle.location = document.getElementById("locationFound").innerHTML;
       storiesRef.push(this.newArticle);
       this.newArticle.title = '';
       this.newArticle.body = '';
       this.newArticle.location = '';
       this.newArticle.dateAdded = '';
+      this.newArticle.author = "";
+      this.newArticle.authorID = "";
     },
     logOut() { 
         firebase.auth().signOut();
@@ -166,7 +183,6 @@ export default {
       this.currentPlace = place;
     },
     geolocate: function() {
-
       navigator.geolocation.getCurrentPosition(position => {
         this.center = {
           lat: position.coords.latitude,
@@ -183,7 +199,6 @@ export default {
             //This is placing the marker at the returned address    
             if (results[1]) {
                 location = (results[1].formatted_address);
-
             }
           }
           document.getElementById("locationFound").innerHTML = location;
