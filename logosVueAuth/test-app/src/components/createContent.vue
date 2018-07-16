@@ -52,43 +52,21 @@
               <th>
                 Title:
               </th>
-              <th>
-                Author:
-              </th>
-              <th>
-                Body:
-              </th>
-              <th>
-                Location:
-              </th>
-              <th>
-                Date Added:
-              </th>
-              <th>
-                View Count:
-              </th>
+              <th>Author:</th>
+              <th>Body:</th>
+              <th>Location:</th>
+              <th>Date Added:</th>
+              <th>View Count:</th>
             </tr>
           </thead>
           <tbody>
-            <tr v-for="storie in stories">
-              <td>
-                {{ storie.title }}
-              </td>
-              <td>
-                {{ storie.author }}
-              </td>
-              <td>
-                {{ storie.body }}
-              </td>
-              <td>
-                {{ storie.location }}
-              </td>
-              <td>
-                {{ storie.dateAdded }}
-              </td>
-              <td>
-                {{ storie.viewCount }}
-              </td>
+            <tr v-for="story in stories">
+              <td>{{ story.title }}</td>
+              <td>{{ story.author }}</td>
+              <td>{{ story.body }}</td>
+              <td>{{ story.location }}</td>
+              <td>{{ story.dateAdded }}</td>
+              <td>{{ story.viewCount }}</td>
             </tr>
           </tbody>
         </table>
@@ -97,10 +75,10 @@
     <router-view/>
   </div>
 </template>
-<script src="https://maps.google.com/maps?file=api&amp;v=3&amp;sensor=false"
-     type="text/javascript"></script>
-<script>
 
+<script src="https://maps.google.com/maps?file=api&amp;v=3&amp;sensor=false" type="text/javascript"></script>
+
+<script>
 var firebase = require('firebase/app');
 require('firebase/auth');
 require('firebase/database');
@@ -208,32 +186,33 @@ export default {
     }
   } 
 }
-
 </script>
 
+<!-- CSS STYLING -->
+
 <style>
-#app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  color: #2c3e50;
-  margin-top: 60px;
-}
+  #app {
+    font-family: 'Avenir', Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    color: #2c3e50;
+    margin-top: 60px;
+  }
 
-#articleBody{
-  height: 200px;
-}
+  #articleBody {
+    height: 200px;
+  }
 
-form{
-  padding-left: 5%;
-  padding-right: 5%;
-}
+  form {
+    padding-left: 5%;
+    padding-right: 5%;
+  }
 
-#submit{ 
-  margin-bottom: 2%;
-}
+  #submit { 
+    margin-bottom: 2%;
+  }
 
-#findLocation{
-  padding-bottom: 2%;
-}
+  #findLocation {
+    padding-bottom: 2%;
+  }
 </style>
