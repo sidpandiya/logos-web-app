@@ -3,7 +3,7 @@
 <template>
   <div class="container">
     <div class="page-header">
-      <h1>LOLOLOLOLOLOLOL</h1>
+      <h1>Post Creation Page</h1>
       <button @click='logOut'>Log out</button>
     </div>
 
@@ -34,7 +34,9 @@
           </gmap-map>
           <div class="form-group">
             <label for="articleBody">Body:</label>
-            <input type="text" id="articleBody" class="form-control" v-model="newArticle.body">
+            <!-- Quill Editor Integration -->
+            <vue-editor id="articleBody" v-model="newArticle.body"></vue-editor>
+            <!-- <input type="text" id="articleBody" class="form-control" v-model="newArticle.body"> -->
           </div>
           <input id="submit" type="submit" class="btn btn-primary" value="Post">
           </form>
@@ -74,11 +76,15 @@
     </div>
     <router-view/>
   </div>
+
 </template>
 
 <script src="https://maps.google.com/maps?file=api&amp;v=3&amp;sensor=false" type="text/javascript"></script>
 
 <script>
+
+import { VueEditor } from 'vue2-editor'
+
 var firebase = require('firebase/app');
 require('firebase/auth');
 require('firebase/database');
@@ -117,6 +123,9 @@ export default {
     users: usersRef,
     stories: storiesRef
   },
+  components: {
+      VueEditor
+   },
   data (){
     return { 
           newArticle: {

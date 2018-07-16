@@ -4,13 +4,14 @@
   <div id="app"> 
     <div class="centered"><router-link to="/login">Go to the login page!</router-link></div>
     <!-- <div class="centered"><router-link to="/app">Go to the Logos page!</router-link></div> -->
+    
     <router-view></router-view>
-    <router-view name="editor"></router-view>
+    <!-- <router-view name="editor"></router-view> -->
   </div>
-</template> 
+</template>
 
 <script>
-  export default { 
+  export default {
     name: 'app', 
   }
 </script>

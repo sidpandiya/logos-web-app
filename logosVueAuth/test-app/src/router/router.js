@@ -9,10 +9,11 @@ const router = new VueRouter({
   routes: [
     { path: '/', component: Login },
     { path: '/login', component: Login },
-    { path: '/create', components: {
-      default: createContent,
-      editor: Quill}
-    }
+    { path: '/create', component: createContent }
+    // { path: '/create', components: {
+    //   default: createContent,
+    //   editor: Quill}
+    // }
   ]
 });
 export default router;
