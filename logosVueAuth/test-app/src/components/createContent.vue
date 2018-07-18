@@ -45,6 +45,58 @@
           </div>
           <input id="submit" type="submit" class="btn btn-primary" value="Post">
           </form>
+          <!-- Vue Upload Component -->
+          <!-- <file-upload
+            ref="upload"
+            v-model="files"
+            post-action="/post.method"
+            put-action="/put.method"
+            @input-file="inputFile"
+            @input-filter="inputFilter"
+          >
+          Upload file
+          </file-upload> -->
+          <div class="example-simple">
+    <h1 id="example-title" class="example-title">Media Upload Test</h1>
+    <div class="upload">
+      <ul>
+        <li v-for="(file, index) in files" :key="file.id">
+          <span>{{file.name}}</span> -
+          <span>{{file.size | formatSize}}</span> -
+          <span v-if="file.error">{{file.error}}</span>
+          <span v-else-if="file.success">success</span>
+          <span v-else-if="file.active">active</span>
+          <span v-else-if="file.active">active</span>
+          <span v-else></span>
+        </li>
+      </ul>
+      <!-- Media Upload Example -->
+      <div class="example-btn">
+        <file-upload
+          class="btn btn-primary"
+          post-action="/upload/post"
+          extensions="gif,jpg,jpeg,png,webp"
+          accept="image/png,image/gif,image/jpeg,image/webp"
+          :multiple="true"
+          :size="1024 * 1024 * 10"
+          v-model="files"
+          @input-filter="inputFilter"
+          @input-file="inputFile"
+          ref="upload">
+          <i class="fa fa-plus"></i>
+          Select files
+        </file-upload>
+        <button type="button" class="btn btn-success" v-if="!$refs.upload || !$refs.upload.active" @click.prevent="$refs.upload.active = true">
+          <i class="fa fa-arrow-up" aria-hidden="true"></i>
+          Start Upload
+        </button>
+        <button type="button" class="btn btn-danger"  v-else @click.prevent="$refs.upload.active = false">
+          <i class="fa fa-stop" aria-hidden="true"></i>
+          Stop Upload
+        </button>
+      </div>
+    </div>
+  </div>
       </div>
     </div>
 
@@ -207,8 +259,46 @@ export default {
           lng: position.coords.longitude
         };
       });
+    },
+     /**
+     * Has changed
+     * @param  Object|undefined   newFile   Read only
+     * @param  Object|undefined   oldFile   Read only
+     * @return undefined
+     */
+    inputFile: function (newFile, oldFile) {
+      if (newFile && oldFile && !newFile.active && oldFile.active) {
+        // Get response data
+        console.log('response', newFile.response)
+        if (newFile.xhr) {
+          //  Get the response status code
+          console.log('status', newFile.xhr.status)
+        }
+      }
+    },
+    /**
+     * Pretreatment
+     * @param  Object|undefined   newFile   Read and write
+     * @param  Object|undefined   oldFile   Read only
+     * @param  Function           prevent   Prevent changing
+     * @return undefined
+     */
+    inputFilter: function (newFile, oldFile, prevent) {
+      if (newFile && !oldFile) {
+        // Filter non-image file
+        if (!/\.(jpeg|jpe|jpg|gif|png|webp)$/i.test(newFile.name)) {
+          return prevent()
+        }
+      }
+
+      // Create a blob field
+      newFile.blob = ''
+      let URL = window.URL || window.webkitURL
+      if (URL && URL.createObjectURL) {
+        newFile.blob = URL.createObjectURL(newFile.file)
+      }
     }
-  } 
+  }
 }
 </script>
 
@@ -232,11 +322,18 @@ export default {
     padding-right: 5%;
   }
 
-  #submit { 
+  #submit {
     margin-bottom: 2%;
   }
 
   #findLocation {
     padding-bottom: 2%;
   }
+
+  /* upload component styling */
+  .example-simple label.btn {
+    margin-bottom: 0;
+    margin-right: 1rem;
+  }
+
 </style>

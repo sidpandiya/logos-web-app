@@ -1,5 +1,5 @@
 <!-- QUILL EDITOR COMPONENT -->
-
+<!--
 <template>
    <div id="editor">
      <vue-editor v-model="content"></vue-editor>

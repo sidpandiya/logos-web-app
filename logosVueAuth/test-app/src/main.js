@@ -7,11 +7,14 @@ import firebaseui from 'firebaseui';
 import router from './router/router'
 import {config} from './helpers/config'
 import VueGeolocation from 'vue-browser-geolocation';
-import * as VueGoogleMaps from "vue2-google-maps";
+import * as VueGoogleMaps from 'vue2-google-maps';
+import VueUploadComponent from 'vue-upload-component';
 
 Vue.use(VueGeolocation);
-Vue.use(VueRouter)
-Vue.use(VueFire)
+Vue.use(VueRouter);
+Vue.use(VueFire);
+Vue.use(VueUploadComponent);
+
 Vue.use(VueGoogleMaps, {
   load: {
     key: "AIzaSyCtsm796m9FbzeWWQ6EmvTD35ISOTWYoTI",
@@ -33,3 +36,5 @@ new Vue({
   el: '#app',
   render: h => h(App)
 });
+
+Vue.component('file-upload', VueUploadComponent);
