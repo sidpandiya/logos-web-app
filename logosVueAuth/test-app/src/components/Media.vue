@@ -1,25 +1,26 @@
 <template>
     <div>
-  <ul>
-    <li v-for="file in files">{{file.name}} - Error: {{file.error}}, Success: {{file.success}}</li>
-  </ul>
-  <file-upload
-    ref="upload"
-    v-model="files"
-    post-action="/post.method"
-    put-action="/put.method"
-    @input-file="inputFile"
-    @input-filter="inputFilter"
-  >
-  Upload file
-  </file-upload>
-  <button v-show="!$refs.upload || !$refs.upload.active" @click.prevent="$refs.upload.active = true" type="button">Start upload</button>
-  <button v-show="$refs.upload && $refs.upload.active" @click.prevent="$refs.upload.active = false" type="button">Stop upload</button>
-</div>
+      <ul>
+        <li v-for="file in files">{{file.name}} - Error: {{file.error}}, Success: {{file.success}}</li>
+      </ul>
+      <file-upload
+        ref="upload"
+        v-model="files"
+        post-action="/post.method"
+        put-action="/put.method"
+        @input-file="inputFile"
+        @input-filter="inputFilter"
+      >
+      Upload file
+      </file-upload>
+      <button v-show="!$refs.upload || !$refs.upload.active" @click.prevent="$refs.upload.active = true" type="button">Start upload</button>
+      <button v-show="$refs.upload && $refs.upload.active" @click.prevent="$refs.upload.active = false" type="button">Stop upload</button>
+    </div>
 </template>
 
 
 <script>
+import { VueUploadComponent } from 'vue-upload-component';
 
 export default{
   data: function () {

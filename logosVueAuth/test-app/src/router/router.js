@@ -3,13 +3,15 @@ import Login from '../components/Login.vue';
 import App from '../components/App.vue'
 import createContent from '../components/createContent.vue';
 import Quill from '../components/Quill.vue';
+import Media from '../components/Media.vue';
 
 const router = new VueRouter({
   mode: 'history',
   routes: [
     { path: '/', component: Login },
     { path: '/login', component: Login },
-    { path: '/create', component: createContent }
+    { path: '/create', component: createContent },
+    { path: 'upload/post', component: createContent}
     // { path: '/create', components: {
     //   default: createContent,
     //   editor: Quill}
