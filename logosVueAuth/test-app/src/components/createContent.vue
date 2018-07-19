@@ -11,11 +11,17 @@
       <div class="panel-heading">
         <h3>Add an Article</h3>
       </div>
+      <p v-if="errors.length">
+        <b>Please correct the following error(s):</b>
+        <ul>
+          <li v-for="error in errors">{{ error }}</li>
+        </ul>
+      </p>
       <div class="panel-body">
         <form id="addArticle" class="row" v-on:submit.prevent="postArticle">
           <div class="form-group">
             <label for="articleTitle">Title:</label>
-            <input type="text" id="articleTitle" class="form-control" v-model="newArticle.title">
+            <input type="text" pattern=".{1,}" required id="articleTitle" class="form-control" v-model="newArticle.title">
           </div>
           <div id="findLocation">
             <label for="articleLocation">
@@ -41,7 +47,7 @@
             <label for="articleBody">Body:</label>
             <!-- Quill Editor Integration -->
             <vue-editor id="articleBody" v-model="newArticle.body"></vue-editor>
-            <!-- <input type="text" id="articleBody" class="form-control" v-model="newArticle.body"> -->
+            <!-- <input type="text" pattern=".{30,}" required id="articleBody" class="form-control" v-model="newArticle.body"> -->
           </div>
           <input id="submit" type="submit" class="btn btn-primary" value="Post">
           </form>
@@ -212,13 +218,29 @@ export default {
           markers: [],
           places: [],
           currentPlace: null,
-          files: []
+          files: [],
+          errors: []
     }
   },
   mounted() {
     this.geolocate();
   },
   methods: {
+    checkForm: function(e) {
+      this.errors = [];
+      if(this.newArticle.body.length < 75) {
+        if(this.newArticle.title.length < 1){
+          this.errors.push("Please fill in a valid title.");
+        }
+        this.errors.push("Please fill in the body with more characters.");
+        return false;
+      }
+      if(this.newArticle.title.length < 1){
+        this.errors.push("Please fill in a valid title.");
+        return false;
+      }
+      return true;
+    },
     postArticle: function(){
       var location = document.getElementById("locationAutofill").innerHTML;
       var options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
@@ -237,24 +259,29 @@ export default {
       this.newArticle.location = decodedLocation;
       console.log("New location: " + this.newArticle.location);
 
-      console.log("Old: " + this.newArticle.title);
+      console.log("Old title: " + this.newArticle.title);
       var encodedTitle = this.$sanitize(this.newArticle.title);
       var decodedTitle = encodedTitle.replace(/&amp;/g, '&');
       this.newArticle.title = decodedTitle;
-      console.log("New: " + this.newArticle.title);
+      console.log("New title: " + this.newArticle.title);
 
       console.log("Old body: " + this.newArticle.body);
       var backToTags = underscore.unescape(this.newArticle.body);
       this.newArticle.body = this.$sanitize(backToTags);
       console.log("New body: " + this.newArticle.body);
 
-      storiesRef.push(this.newArticle);
-      this.newArticle.title = '';
-      this.newArticle.body = '';
-      this.newArticle.location = '';
-      this.newArticle.dateAdded = '';
-      this.newArticle.author = "";
-      this.newArticle.authorID = "";
+      console.log(this.newArticle.title.length);
+      console.log(this.newArticle.body.length);
+
+      if(this.checkForm(event) == true){
+        storiesRef.push(this.newArticle);
+        this.newArticle.title = '';
+        this.newArticle.body = '';
+        this.newArticle.location = '';
+        this.newArticle.dateAdded = '';
+        this.newArticle.author = "";
+        this.newArticle.authorID = "";
+      }
     },
     logOut() { 
         firebase.auth().signOut();
