@@ -49,60 +49,12 @@
               <vue-editor id="articleBody" v-model="newPostContent.content"></vue-editor>
               <!-- <input type="text" pattern=".{30,}" required id="articleBody" class="form-control" v-model="newPostContent.content"> -->
           </div>
+          <!-- Media Upload -->
+          <div class="form-group">
+              
+          </div>
           <input id="submit" type="submit" class="btn btn-primary" value="Post">
           </form>
-          <!-- Vue Upload Component -->
-          <!-- <file-upload
-            ref="upload"
-            v-model="files"
-            post-action="/post.method"
-            put-action="/put.method"
-            @input-file="inputFile"
-            @input-filter="inputFilter"
-          >
-          Upload file
-          </file-upload> -->
-          <div class="example-simple">
-            <h1 id="example-title" class="example-title">Media Upload Test</h1>
-            <div class="upload">
-              <ul>
-                <li v-for="(file, index) in files" :key="file.id">
-                  <span>{{file.name}}</span> -
-                  <span>{{file.size | formatSize}}</span> -
-                  <span v-if="file.error">{{file.error}}</span>
-                  <span v-else-if="file.success">success</span>
-                  <span v-else-if="file.active">active</span>
-                  <span v-else-if="file.active">active</span>
-                  <span v-else></span>
-                </li>
-              </ul>
-              <!-- Media Upload Example -->
-              <div class="example-btn">
-                <file-upload
-                  class="btn btn-primary"
-                  post-action="http://localhost:3000/create"
-                  extensions="gif,jpg,jpeg,png,webp"
-                  accept="image/png,image/gif,image/jpeg,image/webp"
-                  :multiple="true"
-                  :size="1024 * 1024 * 10"
-                  v-model="files"
-                  @input-filter="inputFilter"
-                  @input-file="inputFile"
-                  ref="upload">
-                  <i class="fa fa-plus"></i>
-                  Select files
-                </file-upload>
-                <button type="button" class="btn btn-success" v-if="!$refs.upload || !$refs.upload.active" @click.prevent="$refs.upload.active = true">
-                  <i class="fa fa-arrow-up" aria-hidden="true"></i>
-                  Start Upload
-                </button>
-                <button type="button" class="btn btn-danger"  v-else @click.prevent="$refs.upload.active = false">
-                  <i class="fa fa-stop" aria-hidden="true"></i>
-                  Stop Upload
-                </button>
-              </div>
-            </div>
-          </div>
       </div>
     </div>
 
@@ -147,7 +99,6 @@
 <script>
 
 import { VueEditor } from 'vue2-editor'
-import FileUpload from 'vue-upload-component'
 
 var firebase = require('firebase/app');
 require('firebase/auth');
@@ -192,7 +143,6 @@ export default {
 
   },
   components: {
-    FileUpload,
     VueEditor
   },
   data (){
@@ -541,11 +491,4 @@ export default {
   #findLocation {
     padding-bottom: 2%;
   }
-
-  /* upload component styling */
-  .example-simple label.btn {
-    margin-bottom: 0;
-    margin-right: 1rem;
-  }
-
 </style>

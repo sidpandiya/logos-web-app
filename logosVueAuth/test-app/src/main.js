@@ -10,12 +10,10 @@ import VueGeolocation from 'vue-browser-geolocation';
 import * as VueGoogleMaps from "vue2-google-maps";
 import VueSanitize from "vue-sanitize";
 import underscore from 'vue-underscore';
-import VueUploadComponent from 'vue-upload-component';
 
 Vue.use(VueGeolocation);
 Vue.use(VueRouter);
 Vue.use(VueFire);
-Vue.use(VueUploadComponent);
 
 Vue.use(VueGoogleMaps, {
   load: {
@@ -48,5 +46,3 @@ new Vue({
   el: '#app',
   render: h => h(App)
 });
-
-Vue.component('file-upload', VueUploadComponent);
