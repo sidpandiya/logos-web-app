@@ -274,8 +274,8 @@ export default {
           currentUserID = user.uid;
 
           usersRef.orderByChild("socialId").equalTo(currentUserID).on('value', function(snapshot) {
-            if (!snapshot.exists()) {
-              inDB = false;
+            if (snapshot.exists()) {
+              inDB = true;
             }
           });
           if(!inDB){
