@@ -77,10 +77,10 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="post in posts">
+            <tr v-for="(post, key) in posts" >
               <td >{{ post.title }}</td>
-              <td v-if="name = getName(post.userId)">{{ name }}</td>
-              <td v-if="content = getContent(post.key)">{{ content }}</td>
+              <td v-for="user in users" v-if="user.socialId == post.userId">{{ user.name }}</td>
+              <td v-for="pContent in postContent" v-if="pContent.postId == post['.key']" >{{ pContent.content }}</td>
               <td>{{ post.city + ", " + post.country }}</td>
               <td>{{ post.createdOn }}</td>
               <td>{{ post.views }}</td>
@@ -126,13 +126,6 @@ let userTweetsRef = db.ref('userTweets');
 var currentUser = "";
 var currentUserID = "";
 
-
-// postsRef.once('value', function(snapshot){
-//     snapshot.forEach(function(_child){
-//         var society = _child.key;
-//         console.log(society);
-//     });
-// });
 var currame = "";
 export default {
   name: 'create',
@@ -193,11 +186,17 @@ export default {
           places: [],
           currentPlace: null,
           files: [],
-          errors: []
+          errors: [],
+          pContent: ""
     }
   },
   mounted() {
     this.geolocateInitial(this.checkUser);
+    //postsRef.once('value', function(snapshot) {
+    //  snapshot.forEach(function(childSnapshot) {
+    //    console.log(childSnapshot.key);
+    //  });
+    //});
   },
   methods: {
     addUser: function(userObject, userId){
@@ -228,7 +227,6 @@ export default {
 
           currentUser = user.displayName;
           currentUserID = user.uid;
-          currame = $this.getName(currentUserID);
 
           usersRef.orderByChild("socialId").equalTo(currentUserID).on('value', function(snapshot) {
             if (snapshot.exists()) {
