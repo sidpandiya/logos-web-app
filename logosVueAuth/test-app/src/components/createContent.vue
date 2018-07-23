@@ -24,30 +24,30 @@
             <input type="text" pattern=".{1,}" required id="articleTitle" class="form-control" v-model="newArticle.title">
           </div>
           <div id="findLocation">
-            <label for="articleLocation">
-              <gmap-autocomplete
-                @place_changed="setPlace">
-              </gmap-autocomplete> <span id="locationAutofill">Enter a location.</span>
-            </label>
-            <br/>
+              <label for="articleLocation">
+                <gmap-autocomplete
+                  @place_changed="setPlace">
+                </gmap-autocomplete> <span id="locationAutofill">Enter a location.</span>
+              </label>
+              <br/>
           </div>
           <gmap-map
-            :center="center"
-            :zoom="12"
-            style="width:100%;  height: 400px;"
+              :center="center"
+              :zoom="12"
+              style="width:100%;  height: 400px;"
           >
-            <gmap-marker
-              :key="index"
-              v-for="(m, index) in markers"
-              :position="m.position"
-              @click="center=m.position"
-            ></gmap-marker>
+              <gmap-marker
+                :key="index"
+                v-for="(m, index) in markers"
+                :position="m.position"
+                @click="center=m.position"
+              ></gmap-marker>
           </gmap-map>
           <div class="form-group">
-            <label for="articleBody">Body:</label>
-            <!-- Quill Editor Integration -->
-            <vue-editor id="articleBody" v-model="newArticle.body"></vue-editor>
-            <!-- <input type="text" pattern=".{30,}" required id="articleBody" class="form-control" v-model="newArticle.body"> -->
+              <label for="articleBody">Body:</label>
+              <!-- Quill Editor Integration -->
+              <vue-editor id="articleBody" v-model="newArticle.media"></vue-editor>
+              <!-- <input type="text" pattern=".{30,}" required id="articleBody" class="form-control" v-model="newArticle.media"> -->
           </div>
           <input id="submit" type="submit" class="btn btn-primary" value="Post">
           </form>
@@ -117,21 +117,21 @@
               <th>
                 Title:
               </th>
-              <th>Author:</th>
+              <th>Author ID:</th>
               <th>Body:</th>
               <th>Location:</th>
               <th>Date Added:</th>
-              <th>View Count:</th>
+              <th>Views:</th>
             </tr>
           </thead>
           <tbody>
-            <tr v-for="story in stories">
-              <td>{{ story.title }}</td>
-              <td>{{ story.author }}</td>
-              <td v-html="story.body">{{  }}</td>
-              <td>{{ story.location }}</td>
-              <td>{{ story.dateAdded }}</td>
-              <td>{{ story.viewCount }}</td>
+            <tr v-for="post in posts">
+              <td>{{ post.title }}</td>
+              <td>{{ post.userId }}</td>
+              <td v-html="post.media">{{  }}</td>
+              <td>{{ post.city + ", " + post.country }}</td>
+              <td>{{ post.createdOn }}</td>
+              <td>{{ post.views }}</td>
             </tr>
           </tbody>
         </table>
@@ -167,25 +167,15 @@ let app = firebase.initializeApp(config);
 
 let db = app.database();
 
-let usersRef = db.ref('users');
-let storiesRef = db.ref('stories');
+let usersRef = db.ref('user');
+let postsRef = db.ref('posts');
 let userTweetsRef = db.ref('userTweets');
 
 var currentUser = "";
 var currentUserID = "";
-firebase.auth().onAuthStateChanged((function(user) {
-  if (user) {
-    //social media user id
-    //console.log(user.providerData[0].uid);
 
-    currentUser = user.displayName;
-    currentUserID = user.uid;
-  } else {
-    // No user is signed in.
-  }
-}));
 
-// storiesRef.once('value', function(snapshot){
+// postsRef.once('value', function(snapshot){
 //     snapshot.forEach(function(_child){
 //         var society = _child.key;
 //         console.log(society);
@@ -196,7 +186,7 @@ export default {
   name: 'create',
   firebase: {
     users: usersRef,
-    stories: storiesRef
+    posts: postsRef
   },
   components: {
     FileUpload,
@@ -206,15 +196,42 @@ export default {
     return { 
           newArticle: {
             title: '',
-            body: '',
-            author: '',
-            authorID: '',
-            location: '',
-            viewCount: 0,
-            dateAdded: '',
+            media: '',
+            userId: "",
+            city: "N/A",
+            country: "N/A",
+            views: 0,
+            createdOn: "",
+            deletedByAdmin: 0,
+            isDeleted: 0,
+            isEdited: 0,
+            isReported: 0,
+            latitude: "0",
+            longitude: "0",
+            modifiedOn: "",
+            type: 1
           },
-          stories: storiesRef,
-          center: { lat: 34.0689, lng: -118.4452 },
+          newUser: {
+            city: "",
+            contact: "",
+            country: "N/A",
+            currentCity: "N/A",
+            currentCountry: "N/A",
+            email: "fakeemail@gmail.com",
+            highEndorsmentCount: 50,
+            highEndorsmentName: "Indian Politics",
+            isDeleted: 0,
+            isNormalUser: 1,
+            latitude: "0",
+            logginType: 1,
+            longitude: "0",
+            name: "Tester",
+            photo: "https://i.etsystatic.com/8916355/r/il/25c83f/55...",
+            politicalOrientation: "Center(moderate)",
+            socialId: "fakeSocialID"
+          },
+          posts: postsRef,
+          center: { lat: 0, lng: 0 },
           markers: [],
           places: [],
           currentPlace: null,
@@ -223,12 +240,64 @@ export default {
     }
   },
   mounted() {
-    this.geolocate();
+    this.geolocateInitial(this.checkUser);
+    //this.checkUser();
   },
   methods: {
+    addUser: function(userObject){
+      this.newUser.latitude = this.center.lat;
+      this.newUser.longitude = this.center.lng;
+      var uData = userObject.providerData[0];
+      this.newUser.email = uData.email;
+      this.newUser.name = uData.displayName;
+      this.newUser.contact = uData.phoneNumber;
+      this.newUser.photo = uData.photoURL;
+      usersRef.push(this.newUser);
+
+
+    },
+    checkUser: function(){
+      var inDB = false;
+
+      var $this = this;
+      var userObject = {};
+
+      firebase.auth().onAuthStateChanged((function(user) {
+        if (user) {
+          userObject = user;
+
+          //social media user id
+          //console.log(user.providerData[0]);
+
+          currentUser = user.displayName;
+          currentUserID = user.uid;
+
+          usersRef.orderByChild("socialId").equalTo(currentUserID).on('value', function(snapshot) {
+            if (!snapshot.exists()) {
+              inDB = false;
+            }
+          });
+          if(!inDB){
+            $this.addUser(userObject);
+          }
+
+          //usersRef.on('value', function(snapshot) {
+          //   var user = snapshot.val();
+          //   if (user.socialId == currentUserID){
+          //      alert ("exist");
+          //   } else {
+          //    console.log(user.socialId);
+          //   }
+          //});
+
+        } else {
+          // No user is signed in.
+        }
+      }));
+    },
     checkForm: function(e) {
       this.errors = [];
-      if(this.newArticle.body.length < 75) {
+      if(this.newArticle.media.length < 75) {
         if(this.newArticle.title.length < 1){
           this.errors.push("Please fill in a valid title.");
         }
@@ -242,12 +311,11 @@ export default {
       return true;
     },
     postArticle: function(){
-      var location = document.getElementById("locationAutofill").innerHTML;
+      var location = this.newArticle.city + ", " + this.newArticle.country;
       var options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
       const now = new Date().toLocaleDateString('en-US', options);
-      this.newArticle.dateAdded = now.toString();
+      this.newArticle.createdOn = now.toString();
       this.newArticle.author = currentUser;
-      this.newArticle.authorID = currentUserID;
 
       //sanitize inputs
       console.log("Old location: " + location);
@@ -265,20 +333,23 @@ export default {
       this.newArticle.title = decodedTitle;
       console.log("New title: " + this.newArticle.title);
 
-      console.log("Old body: " + this.newArticle.body);
-      var backToTags = underscore.unescape(this.newArticle.body);
-      this.newArticle.body = this.$sanitize(backToTags);
-      console.log("New body: " + this.newArticle.body);
+      console.log("Old body: " + this.newArticle.media);
+      var backToTags = underscore.unescape(this.newArticle.media);
+      this.newArticle.media = this.$sanitize(backToTags);
+      console.log("New body: " + this.newArticle.media);
 
       console.log(this.newArticle.title.length);
-      console.log(this.newArticle.body.length);
+      console.log(this.newArticle.media.length);
 
+      console.log(currentUserID);
+      this.newArticle.userId = "" + currentUserID + "";
       if(this.checkForm(event) == true){
-        storiesRef.push(this.newArticle);
+        postsRef.push(this.newArticle);
         this.newArticle.title = '';
-        this.newArticle.body = '';
-        this.newArticle.location = '';
-        this.newArticle.dateAdded = '';
+        this.newArticle.media = '';
+        this.newArticle.city = "N/A";
+        this.newArticle.country = "N/A";
+        this.newArticle.createdOn = '';
         this.newArticle.author = "";
         this.newArticle.authorID = "";
       }
@@ -288,12 +359,32 @@ export default {
     },
     setPlace(place) {
       this.currentPlace = place;
+      console.log(place.address_components);
+
+      console.log(typeof(place.address_components));
+      console.log(place.address_components[1].short_name);
+      console.log(place.address_components[3].short_name);
+      for(var property in place.address_components){
+        for(var i=0; i<10; i++){
+          if(property == i){
+            var locationInstance = place.address_components[property];
+            if(locationInstance.types[0] == "city" || locationInstance.types[0] == "locality"){
+              this.newArticle.city = locationInstance.long_name;
+            }
+            if(locationInstance.types[0] == "country" || locationInstance.types[0] == "administrative_area_level_1"){
+              this.newArticle.country = locationInstance.long_name;
+            }
+          }
+        }
+      }
       if (this.currentPlace) {
         const marker = {
           lat: this.currentPlace.geometry.location.lat(),
           lng: this.currentPlace.geometry.location.lng()
         };
         this.center = marker;
+        this.newArticle.latitude = marker.lat;
+        this.newArticle.longitude = marker.lng;
         this.currentPlace = null;
       }
       var geocoder = new google.maps.Geocoder();
@@ -318,12 +409,23 @@ export default {
     },
     geolocate: function() {
       navigator.geolocation.getCurrentPosition(position => {
+        console.log(this);
         this.center = {
           lat: position.coords.latitude,
           lng: position.coords.longitude
         };
       });
     },
+    geolocateInitial: function(callback) {
+      navigator.geolocation.getCurrentPosition(position => {
+        this.center = {
+          lat: position.coords.latitude,
+          lng: position.coords.longitude
+        };
+        callback();
+      });
+    },
+
      /**
      * Has changed
      * @param  Object|undefined   newFile   Read only
