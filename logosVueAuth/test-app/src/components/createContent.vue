@@ -244,7 +244,7 @@ export default {
     //this.checkUser();
   },
   methods: {
-    addUser: function(userObject){
+    addUser: function(userObject, userId){
       this.newUser.latitude = this.center.lat;
       this.newUser.longitude = this.center.lng;
       var uData = userObject.providerData[0];
@@ -252,6 +252,7 @@ export default {
       this.newUser.name = uData.displayName;
       this.newUser.contact = uData.phoneNumber;
       this.newUser.photo = uData.photoURL;
+      this.newUser.socialId = userId;
       usersRef.push(this.newUser);
 
 
@@ -278,7 +279,7 @@ export default {
             }
           });
           if(!inDB){
-            $this.addUser(userObject);
+            $this.addUser(userObject, currentUserID);
           }
 
           //usersRef.on('value', function(snapshot) {
