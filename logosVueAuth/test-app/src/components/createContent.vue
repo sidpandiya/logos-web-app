@@ -227,12 +227,14 @@ export default {
 
           currentUser = user.displayName;
           currentUserID = user.uid;
+          console.log(currentUserID)
 
           usersRef.orderByChild("socialId").equalTo(currentUserID).on('value', function(snapshot) {
             if (snapshot.exists()) {
               inDB = true;
             }
           });
+          console.log(inDB);
           if(!inDB){
             $this.addUser(userObject, currentUserID);
           }
@@ -277,7 +279,7 @@ export default {
     },
     checkForm: function(e) {
       this.errors = [];
-      if(this.newPostContent.content.length < 75) {
+      if(this.newPostContent.content.length < 5) {
         if(this.newPostContent.content.length < 1){
           this.errors.push("Please fill in a valid title.");
         }
@@ -291,6 +293,7 @@ export default {
       return true;
     },
     postArticle: function(){
+      this.checkUser();
       var location = this.newArticle.city + ", " + this.newArticle.country;
       var options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
       const now = new Date().toLocaleDateString('en-US', options);
