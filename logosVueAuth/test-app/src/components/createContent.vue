@@ -46,8 +46,8 @@
           <div class="form-group">
               <label for="articleBody">Body:</label>
               <!-- Quill Editor Integration -->
-              <vue-editor id="articleBody" v-model="newArticle.media"></vue-editor>
-              <!-- <input type="text" pattern=".{30,}" required id="articleBody" class="form-control" v-model="newArticle.media"> -->
+              <vue-editor id="articleBody" v-model="newPostContent.content"></vue-editor>
+              <!-- <input type="text" pattern=".{30,}" required id="articleBody" class="form-control" v-model="newPostContent.content"> -->
           </div>
           <input id="submit" type="submit" class="btn btn-primary" value="Post">
           </form>
@@ -126,9 +126,9 @@
           </thead>
           <tbody>
             <tr v-for="post in posts">
-              <td>{{ post.title }}</td>
-              <td>{{ post.userId }}</td>
-              <td v-html="post.media">{{  }}</td>
+              <td >{{ post.title }}</td>
+              <td v-if="name = getName(post.userId)">{{ name }}</td>
+              <td v-if="content = getContent(post.key)">{{ content }}</td>
               <td>{{ post.city + ", " + post.country }}</td>
               <td>{{ post.createdOn }}</td>
               <td>{{ post.views }}</td>
@@ -169,6 +169,7 @@ let db = app.database();
 
 let usersRef = db.ref('user');
 let postsRef = db.ref('posts');
+let postContentRef = db.ref('postcontent')
 let userTweetsRef = db.ref('userTweets');
 
 var currentUser = "";
@@ -181,12 +182,14 @@ var currentUserID = "";
 //         console.log(society);
 //     });
 // });
-
+var currame = "";
 export default {
   name: 'create',
   firebase: {
     users: usersRef,
-    posts: postsRef
+    posts: postsRef,
+    postContent: postContentRef
+
   },
   components: {
     FileUpload,
@@ -230,6 +233,10 @@ export default {
             politicalOrientation: "Center(moderate)",
             socialId: "fakeSocialID"
           },
+          newPostContent: {
+            postId: '',
+            content: ''
+          },
           posts: postsRef,
           center: { lat: 0, lng: 0 },
           markers: [],
@@ -241,7 +248,6 @@ export default {
   },
   mounted() {
     this.geolocateInitial(this.checkUser);
-    //this.checkUser();
   },
   methods: {
     addUser: function(userObject, userId){
@@ -272,6 +278,7 @@ export default {
 
           currentUser = user.displayName;
           currentUserID = user.uid;
+          currame = $this.getName(currentUserID);
 
           usersRef.orderByChild("socialId").equalTo(currentUserID).on('value', function(snapshot) {
             if (snapshot.exists()) {
@@ -282,24 +289,48 @@ export default {
             $this.addUser(userObject, currentUserID);
           }
 
-          //usersRef.on('value', function(snapshot) {
-          //   var user = snapshot.val();
-          //   if (user.socialId == currentUserID){
-          //      alert ("exist");
-          //   } else {
-          //    console.log(user.socialId);
-          //   }
-          //});
-
         } else {
           // No user is signed in.
         }
       }));
     },
+    getName: function(userId){
+      console.log("Input: " + userId);
+      var toReturn = "";
+      usersRef.on('value', function(snapshot) {
+        snapshot.forEach(function(users){
+          if(users.val().socialId == userId){
+            console.log("1: " + userId);
+            console.log("2: " + users.val().socialId)
+            toReturn = users.val().name;
+          } else {
+            toReturn = "Anon";
+          }
+        })
+      });
+      return toReturn;
+    },
+    getContent: function(inputPostId){
+      var toReturn = "";
+      postContentRef.on('value', function(snapshot) {
+        snapshot.forEach(function(pContent){
+          if(pContent.val().postId == inputPostId){
+            console.log(inputPostId);
+            console.log(pContent.key);
+            console.log("1: " + inputPostId);
+            console.log("2: " + pContent.val().postId)
+            toReturn = pContent.val().content;
+          } else {
+            toReturn = "Nothing to see here";
+          }
+        })
+      });
+      return toReturn;
+    },
     checkForm: function(e) {
       this.errors = [];
-      if(this.newArticle.media.length < 75) {
-        if(this.newArticle.title.length < 1){
+      if(this.newPostContent.content.length < 75) {
+        if(this.newPostContent.content.length < 1){
           this.errors.push("Please fill in a valid title.");
         }
         this.errors.push("Please fill in the body with more characters.");
@@ -316,7 +347,6 @@ export default {
       var options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
       const now = new Date().toLocaleDateString('en-US', options);
       this.newArticle.createdOn = now.toString();
-      this.newArticle.author = currentUser;
 
       //sanitize inputs
       console.log("Old location: " + location);
@@ -334,25 +364,30 @@ export default {
       this.newArticle.title = decodedTitle;
       console.log("New title: " + this.newArticle.title);
 
-      console.log("Old body: " + this.newArticle.media);
-      var backToTags = underscore.unescape(this.newArticle.media);
-      this.newArticle.media = this.$sanitize(backToTags);
-      console.log("New body: " + this.newArticle.media);
+      console.log("Old body: " + this.newPostContent.content);
+      var backToTags = underscore.unescape(this.newPostContent.content);
+      this.newPostContent.content = this.$sanitize(backToTags);
+      console.log("New body: " + this.newPostContent.content);
 
       console.log(this.newArticle.title.length);
-      console.log(this.newArticle.media.length);
+      console.log(this.newPostContent.content.length);
 
       console.log(currentUserID);
       this.newArticle.userId = "" + currentUserID + "";
       if(this.checkForm(event) == true){
-        postsRef.push(this.newArticle);
+        var newPost = postsRef.push(this.newArticle);
+        var postId = newPost.key;
+        this.newPostContent.postId = postId;
+        postContentRef.push(this.newPostContent);
+
+        this.newPostContent.postId = '';
+        this.newPostContent.content = '';
+
         this.newArticle.title = '';
         this.newArticle.media = '';
         this.newArticle.city = "N/A";
         this.newArticle.country = "N/A";
         this.newArticle.createdOn = '';
-        this.newArticle.author = "";
-        this.newArticle.authorID = "";
       }
     },
     logOut() { 
@@ -360,11 +395,11 @@ export default {
     },
     setPlace(place) {
       this.currentPlace = place;
-      console.log(place.address_components);
+      //console.log(place.address_components);
 
-      console.log(typeof(place.address_components));
-      console.log(place.address_components[1].short_name);
-      console.log(place.address_components[3].short_name);
+      //console.log(typeof(place.address_components));
+      //console.log(place.address_components[1].short_name);
+      //console.log(place.address_components[3].short_name);
       for(var property in place.address_components){
         for(var i=0; i<10; i++){
           if(property == i){
@@ -402,7 +437,7 @@ export default {
           }
         }
         document.getElementById("locationAutofill").innerHTML = location;
-        console.log(document.getElementById("locationAutofill").innerHTML);
+        //console.log(document.getElementById("locationAutofill").innerHTML);
       })
     },
     addMarker() {
@@ -410,7 +445,7 @@ export default {
     },
     geolocate: function() {
       navigator.geolocation.getCurrentPosition(position => {
-        console.log(this);
+        //console.log(this);
         this.center = {
           lat: position.coords.latitude,
           lng: position.coords.longitude
