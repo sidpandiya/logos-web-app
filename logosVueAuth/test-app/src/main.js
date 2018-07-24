@@ -14,7 +14,8 @@ import underscore from 'vue-underscore';
 Vue.use(VueGeolocation);
 Vue.use(VueRouter);
 Vue.use(VueFire);
-
+Vue.use(VueSanitize, defaultOptions);
+Vue.use(underscore);
 Vue.use(VueGoogleMaps, {
   load: {
     key: "AIzaSyCtsm796m9FbzeWWQ6EmvTD35ISOTWYoTI",
@@ -29,8 +30,6 @@ var defaultOptions = {
     'a': [ 'href' ]
   }
 }
-Vue.use(VueSanitize, defaultOptions);
-Vue.use(underscore);
 
 new Vue({
   router,

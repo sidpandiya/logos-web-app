@@ -1,4 +1,5 @@
 <!-- LOGOS APP VIEW -->
+<!-- This file contains most of the logic that handles all form input -->
 
 <template>
   <div class="container">
@@ -6,11 +7,11 @@
       <h1>Post Creation Page</h1>
       <button @click='logOut'>Log out</button>
     </div>
-
     <div class="panel panel-default">
       <div class="panel-heading">
         <h3>Add an Article</h3>
       </div>
+      <!-- This shows any errors that could have been encountered when filling out the form -->
       <p v-if="errors.length">
         <b>Please correct the following error(s):</b>
         <ul>
@@ -31,23 +32,15 @@
               </label>
               <br/>
           </div>
-          <gmap-map
-              :center="center"
-              :zoom="12"
-              style="width:100%;  height: 400px;"
-          >
-              <gmap-marker
-                :key="index"
-                v-for="(m, index) in markers"
-                :position="m.position"
-                @click="center=m.position"
-              ></gmap-marker>
+          <!-- Google Map Component Integration -->
+          <gmap-map :center="center" :zoom="12" style="width:100%;  height: 400px;">
+              <gmap-marker :key="index" v-for="(m, index) in markers" :position="m.position"
+                @click="center=m.position"></gmap-marker>
           </gmap-map>
           <div class="form-group">
               <label for="articleBody">Body:</label>
               <!-- Quill Editor Integration -->
               <vue-editor id="articleBody" v-model="newPostContent.content"></vue-editor>
-              <!-- <input type="text" pattern=".{30,}" required id="articleBody" class="form-control" v-model="newPostContent.content"> -->
           </div>
           <!-- Media Upload -->
           <div class="form-group">
@@ -67,9 +60,7 @@
         <table class="table table-striped">
           <thead>
             <tr>
-              <th>
-                Title:
-              </th>
+              <th>Title:</th>
               <th>Author ID:</th>
               <th>Body:</th>
               <th>Location:</th>
@@ -92,19 +83,18 @@
     </div>
     <router-view/>
   </div>
-
 </template>
 
 <script src="https://maps.google.com/maps?file=api&amp;v=3&amp;sensor=false" type="text/javascript"></script>
 
 <script>
-
 import { VueEditor } from 'vue2-editor'
 
 var firebase = require('firebase/app');
+var underscore = require('underscore');
+
 require('firebase/auth');
 require('firebase/database');
-var underscore = require('underscore');
 
 var config = {
     apiKey: "AIzaSyCA5R7pUDrcpBbhxQ1dk4jLeeZiwl7sV3c",
@@ -116,57 +106,54 @@ var config = {
 };
 
 let app = firebase.initializeApp(config);
-
 let db = app.database();
 
+// make references to collections that need to be edited
 let usersRef = db.ref('user');
 let postsRef = db.ref('posts');
 let postContentRef = db.ref('postcontent');
 let userTweetsRef = db.ref('userTweets');
-
 // Reference for Media Upload
 let imageStoreRef = firebase.storage().ref();
 
 // upload image to firestore update media field
-        setTimeout(function(){
-          console.log("Trying to upload a file!");
+// this is very "hacky" as if the setTimout starts executing the function before
+// the page loads, the event listener will not be attached to the respective DOM elements
+setTimeout(function(){
+  console.log("Trying to upload a file!");
+  var selectedFile;
+  function handleFileUploadChange(e) {
+    console.log("go into change handler");
+    selectedFile = e.target.files[0];
+  }
 
-        var selectedFile;
-        function handleFileUploadChange(e) {
-              console.log("go into change handler");
-              selectedFile = e.target.files[0];
-            }
-
-            function handleFileUploadSubmit(e) {
-              console.log("go into submit handler");
-              var uploadTask = imageStoreRef.child('images/${selectedFile.name}').put(selectedFile);
-              uploadTask.on('state_changed', (snapshot) => {
-              // Observe state change events such as progress, pause, and resume
-              }, (error) => {
-                // Handle unsuccessful uploads
-                console.log("upload error: " + error);
-              }, () => {
-                // Do something once upload is complete
-                console.log('success');
-              });
-            }
-
-            document.querySelector(".image-select").addEventListener("change", handleFileUploadChange);
-            document.querySelector(".image-submit").addEventListener("click", handleFileUploadSubmit);
-
-        }, 10000);
+  function handleFileUploadSubmit(e) {
+    console.log("go into submit handler");
+    var uploadTask = imageStoreRef.child('images/${selectedFile.name}').put(selectedFile);
+    uploadTask.on('state_changed', (snapshot) => {
+    // Observe state change events such as progress, pause, and resume
+    }, (error) => {
+      // Handle unsuccessful uploads
+      console.log("upload error: " + error);
+    }, () => {
+      // Do something once upload is complete
+      console.log('success');
+    });
+  }
+  document.querySelector(".image-select").addEventListener("change", handleFileUploadChange);
+  document.querySelector(".image-submit").addEventListener("click", handleFileUploadSubmit);
+}, 10000);
 
 var currentUser = "";
 var currentUserID = "";
-
 var currame = "";
+
 export default {
   name: 'create',
   firebase: {
     users: usersRef,
     posts: postsRef,
     postContent: postContentRef
-
   },
   components: {
     VueEditor
@@ -178,7 +165,7 @@ export default {
       postsRef.on('value', function(snapshot) {
         snapshot.forEach(function(post){
           let pId = post.val().userId;
-          console.log("pId: " + pId);
+          //console.log("pId: " + pId);
           let associatedName = $this.getName(pId);
           //console.log("name: " + associatedName);
           var userNamePostIdObj = {iD: pId, name: associatedName}
@@ -189,7 +176,7 @@ export default {
             toReturn.push(userNamePostIdObj); 
           }
 
-        })
+        });
       });
       console.log(toReturn);
       return toReturn;
@@ -197,63 +184,58 @@ export default {
   },
   data (){
     return { 
-          newArticle: {
-            title: '',
-            media: '',
-            userId: "",
-            city: "N/A",
-            country: "N/A",
-            views: 0,
-            createdOn: "",
-            deletedByAdmin: 0,
-            isDeleted: 0,
-            isEdited: 0,
-            isReported: 0,
-            latitude: "0",
-            longitude: "0",
-            modifiedOn: "",
-            type: 1
-          },
-          newUser: {
-            city: "",
-            contact: "",
-            country: "N/A",
-            currentCity: "N/A",
-            currentCountry: "N/A",
-            email: "fakeemail@gmail.com",
-            highEndorsmentCount: 50,
-            highEndorsmentName: "Indian Politics",
-            isDeleted: 0,
-            isNormalUser: 1,
-            latitude: "0",
-            logginType: 1,
-            longitude: "0",
-            name: "Tester",
-            photo: "https://i.etsystatic.com/8916355/r/il/25c83f/55...",
-            politicalOrientation: "Center(moderate)",
-            socialId: "fakeSocialID"
-          },
-          newPostContent: {
-            postId: '',
-            content: ''
-          },
-          posts: postsRef,
-          center: { lat: 0, lng: 0 },
-          markers: [],
-          places: [],
-          currentPlace: null,
-          files: [],
-          errors: [],
-          pContent: ""
+      newArticle: {
+        title: '',
+        media: '',
+        userId: "",
+        city: "N/A",
+        country: "N/A",
+        views: 0,
+        createdOn: "",
+        deletedByAdmin: 0,
+        isDeleted: 0,
+        isEdited: 0,
+        isReported: 0,
+        latitude: "0",
+        longitude: "0",
+        modifiedOn: "",
+        type: 1
+      },
+      newUser: {
+        city: "",
+        contact: "",
+        country: "N/A",
+        currentCity: "N/A",
+        currentCountry: "N/A",
+        email: "fakeemail@gmail.com",
+        highEndorsmentCount: 50,
+        highEndorsmentName: "Indian Politics",
+        isDeleted: 0,
+        isNormalUser: 1,
+        latitude: "0",
+        logginType: 1,
+        longitude: "0",
+        name: "Tester",
+        photo: "https://i.etsystatic.com/8916355/r/il/25c83f/55...",
+        politicalOrientation: "Center(moderate)",
+        socialId: "fakeSocialID"
+      },
+      newPostContent: {
+        postId: '',
+        content: ''
+      },
+      posts: postsRef,
+      center: { lat: 0, lng: 0 },
+      markers: [],
+      places: [],
+      currentPlace: null,
+      files: [],
+      errors: [],
+      pContent: ""
     }
   },
   mounted() {
     this.geolocateInitial(this.checkUser);
-    //postsRef.once('value', function(snapshot) {
-    //  snapshot.forEach(function(childSnapshot) {
-    //    console.log(childSnapshot.key);
-    //  });
-    //});
   },
   methods: {
     addUser: function(userObject, userId){
@@ -266,22 +248,15 @@ export default {
       this.newUser.photo = uData.photoURL;
       this.newUser.socialId = userId;
       usersRef.push(this.newUser);
-
-
     },
     checkUser: function(){
       var inDB = false;
-
       var $this = this;
       var userObject = {};
 
       firebase.auth().onAuthStateChanged((function(user) {
         if (user) {
           userObject = user;
-
-          //social media user id
-          //console.log(user.providerData[0]);
-
           currentUser = user.displayName;
           currentUserID = user.uid;
           //console.log(currentUserID)
@@ -322,7 +297,7 @@ export default {
       var toReturn = "";
       postContentRef.on('value', function(snapshot) {
         snapshot.forEach(function(pContent){
-          if(pContent.val().postId == inputPostId){
+          if(pContent.val().postId == inputPostId) {
             console.log(inputPostId);
             console.log(pContent.key);
             console.log("1: " + inputPostId);
@@ -338,13 +313,13 @@ export default {
     checkForm: function(e) {
       this.errors = [];
       if(this.newPostContent.content.length < 5) {
-        if(this.newPostContent.content.length < 1){
+        if(this.newPostContent.content.length < 1) {
           this.errors.push("Please fill in a valid title.");
         }
         this.errors.push("Please fill in the body with more characters.");
         return false;
       }
-      if(this.newArticle.title.length < 1){
+      if(this.newArticle.title.length < 1) {
         this.errors.push("Please fill in a valid title.");
         return false;
       }
@@ -385,9 +360,6 @@ export default {
       this.newArticle.userId = "" + currentUserID + "";
 
       if(this.checkForm(event) == true){
-
-        
-
         var newPost = postsRef.push(this.newArticle);
         var postId = newPost.key;
         this.newPostContent.postId = postId;
@@ -409,7 +381,6 @@ export default {
     setPlace(place) {
       this.currentPlace = place;
       //console.log(place.address_components);
-
       //console.log(typeof(place.address_components));
       //console.log(place.address_components[1].short_name);
       //console.log(place.address_components[3].short_name);
@@ -454,7 +425,6 @@ export default {
       })
     },
     addMarker() {
-      
     },
     geolocate: function() {
       navigator.geolocation.getCurrentPosition(position => {
