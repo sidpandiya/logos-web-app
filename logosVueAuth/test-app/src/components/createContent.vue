@@ -180,7 +180,7 @@ export default {
           let pId = post.val().userId;
           console.log("pId: " + pId);
           let associatedName = $this.getName(pId);
-          console.log("name: " + associatedName);
+          //console.log("name: " + associatedName);
           var userNamePostIdObj = {iD: pId, name: associatedName}
           var found = toReturn.some(function (el) {
             return el.iD === pId;
@@ -284,7 +284,7 @@ export default {
 
           currentUser = user.displayName;
           currentUserID = user.uid;
-          console.log(currentUserID)
+          //console.log(currentUserID)
 
           usersRef.orderByChild("socialId").equalTo(currentUserID).on('value', function(snapshot) {
             if (snapshot.exists()) {
@@ -303,16 +303,17 @@ export default {
     },
     getName: function(userId){
       //console.log("Input: " + userId);
-      var toReturn = "";
+      var toReturn = "Anon";
       usersRef.on('value', function(snapshot) {
         snapshot.forEach(function(users){
+          console.log(users.val());
           if(users.val().socialId == userId){
             //console.log("1: " + userId);
             //console.log("2: " + users.val().socialId)
             toReturn = users.val().name;
-          } else {
-            toReturn = "Anon";
-          }
+            return toReturn;
+          } 
+          
         })
       });
       return toReturn;
