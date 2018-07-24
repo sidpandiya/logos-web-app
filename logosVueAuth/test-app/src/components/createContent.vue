@@ -71,8 +71,8 @@
           <tbody>
             <tr v-for="(post, key) in posts" >
               <td >{{ post.title }}</td>
-              <td v-for="pair in nameArticlePairs" v-if="pair.iD == post.userId">{{ pair.name }}</td>
-              <td v-for="pContent in postContent" v-if="pContent.postId == post['.key']" v-html="pContent.content">{{ pContent.content }}</td>
+              <td v-for="pair in nameArticlePairs" v-if="pair.piD == post.userId && pair.iD == post['.key']">{{ pair.name }}</td>
+              <td v-for="pair in nameArticlePairs" v-if="pair.iD == post['.key']" v-html="pair.body">{{ pair.body }}</td>
               <td>{{ post.city + ", " + post.country }}</td>
               <td>{{ post.createdOn }}</td>
               <td>{{ post.views }}</td>
@@ -152,7 +152,7 @@ firebase.auth().onAuthStateChanged((function(user) {
   if (user) {
     currentUser = user.displayName;
     currentUserID = user.uid;
-    console.log(currentUserID);
+    //console.log(currentUserID);
 
   } else {
     // No user is signed in.
@@ -175,13 +175,17 @@ export default {
       let $this = this;
       postsRef.on('value', function(snapshot) {
         snapshot.forEach(function(post){
+          const child = post.val();
+          child.id = post.key;
+          //console.log(child.id);
           let pId = post.val().userId;
           //console.log("pId: " + pId);
           let associatedName = $this.getName(pId);
           //console.log("name: " + associatedName);
-          var userNamePostIdObj = {iD: pId, name: associatedName}
+          let concatenatedContent = $this.getContent(child.id);
+          var userNamePostIdObj = {iD: child.id, body: concatenatedContent, piD: pId, name: associatedName}
           var found = toReturn.some(function (el) {
-            return el.iD === pId;
+            return ((el.iD === child.id));
           });
           if (!found) { 
             toReturn.push(userNamePostIdObj); 
@@ -189,9 +193,30 @@ export default {
 
         });
       });
-      console.log(toReturn);
+      //console.log(toReturn);
+      return toReturn;
+    },
+    bodiesParsed(){
+      let $this = this;
+      let toReturn = [];
+      postsRef.on('value', function(snapshot) {
+        snapshot.forEach(function(post){
+          const child = post.val();
+          child.id = post.key;
+          let concatenatedContent = $this.getContent(child.id);
+          var newBodyObj = {iD: child.id, body: concatenatedContent};
+          var found = toReturn.some(function (el) {
+            return el.iD === child.id;
+          });
+          if (!found) { 
+            toReturn.push(newBodyObj); 
+          }
+        });
+      });
+      //console.log(toReturn);
       return toReturn;
     }
+
   },
   data (){
     return { 
@@ -270,7 +295,7 @@ export default {
           userObject = user;
           currentUser = user.displayName;
           currentUserID = user.uid;
-          console.log(currentUserID)
+          //console.log(currentUserID)
 
           usersRef.orderByChild("socialId").equalTo(currentUserID).on('value', function(snapshot) {
             if (snapshot.exists()) {
@@ -304,23 +329,18 @@ export default {
       });
       return toReturn;
     },
-    getContent: function(inputPostId){
+    getContent: function(pId){
+      //console.log(pId);
       var toReturn = "";
       postContentRef.on('value', function(snapshot) {
         snapshot.forEach(function(pContent){
-
-          if(pContent.val().postId == inputPostId){
-            //console.log(inputPostId);
-            //console.log(pContent.key);
-            //console.log("1: " + inputPostId);
-            //console.log("2: " + pContent.val().postId)
-
-            toReturn = pContent.val().content;
-          } else {
-            toReturn = "Nothing to see here";
+          if(pContent.val().postId == pId){
+            //console.log(pContent.val().content)
+            toReturn = toReturn + pContent.val().content;
           }
         })
       });
+      //console.log(toReturn);
       return toReturn;
     },
     checkForm: function(e) {
@@ -363,23 +383,26 @@ export default {
 
       //console.log("Old body: " + this.newPostContent.content);
       var backToTags = underscore.unescape(this.newPostContent.content);
-      this.newPostContent.content = this.$sanitize(backToTags);
+      var str = this.$sanitize(backToTags);
+      var result = str.match( /[^\.!\?]+[\.!\?]+/g );
       //console.log("New body: " + this.newPostContent.content);
 
       //console.log(this.newArticle.title.length);
       //console.log(this.newPostContent.content.length);
 
-      console.log("UID: "+ currentUserID);
+      //console.log("UID: "+ currentUserID);
       this.newArticle.userId = "" + currentUserID + "";
 
       if(this.checkForm(event) == true){
         var newPost = postsRef.push(this.newArticle);
         var postId = newPost.key;
-        this.newPostContent.postId = postId;
-        postContentRef.push(this.newPostContent);
-
-        this.newPostContent.postId = '';
-        this.newPostContent.content = '';
+        for(var i = 0; i<result.length; i++){
+          this.newPostContent.postId = postId;
+          this.newPostContent.content = result[i];
+          postContentRef.push(this.newPostContent);
+          this.newPostContent.postId = '';
+          this.newPostContent.content = '';
+        }
 
         this.newArticle.title = '';
         this.newArticle.media = '';
