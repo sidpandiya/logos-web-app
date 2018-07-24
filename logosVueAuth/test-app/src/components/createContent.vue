@@ -80,7 +80,7 @@
           <tbody>
             <tr v-for="(post, key) in posts" >
               <td >{{ post.title }}</td>
-              <td v-for="user in users" v-if="user.socialId == post.userId">{{ user.name }}</td>
+              <td v-for="pair in nameArticlePairs" v-if="pair.iD == post.userId">{{ pair.name }}</td>
               <td v-for="pContent in postContent" v-if="pContent.postId == post['.key']" >{{ pContent.content }}</td>
               <td>{{ post.city + ", " + post.country }}</td>
               <td>{{ post.createdOn }}</td>
@@ -170,6 +170,30 @@ export default {
   },
   components: {
     VueEditor
+  },
+  computed: {
+    nameArticlePairs(){
+      let toReturn = [];
+      let $this = this;
+      postsRef.on('value', function(snapshot) {
+        snapshot.forEach(function(post){
+          let pId = post.val().userId;
+          console.log("pId: " + pId);
+          let associatedName = $this.getName(pId);
+          console.log("name: " + associatedName);
+          var userNamePostIdObj = {iD: pId, name: associatedName}
+          var found = toReturn.some(function (el) {
+            return el.iD === pId;
+          });
+          if (!found) { 
+            toReturn.push(userNamePostIdObj); 
+          }
+
+        })
+      });
+      console.log(toReturn);
+      return toReturn;
+    }
   },
   data (){
     return { 
@@ -278,13 +302,13 @@ export default {
       }));
     },
     getName: function(userId){
-      console.log("Input: " + userId);
+      //console.log("Input: " + userId);
       var toReturn = "";
       usersRef.on('value', function(snapshot) {
         snapshot.forEach(function(users){
           if(users.val().socialId == userId){
-            console.log("1: " + userId);
-            console.log("2: " + users.val().socialId)
+            //console.log("1: " + userId);
+            //console.log("2: " + users.val().socialId)
             toReturn = users.val().name;
           } else {
             toReturn = "Anon";
