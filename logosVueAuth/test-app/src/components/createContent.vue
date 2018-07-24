@@ -51,9 +51,10 @@
           </div>
           <!-- Media Upload -->
           <div class="form-group">
-              
+              <!-- creates a button that says "choose file" and starts as "No file chosen" -->
+              <input id="photo" class="image-select" type="file" accept="image/png, image/jpeg">
           </div>
-          <input id="submit" type="submit" class="btn btn-primary" value="Post">
+          <input id="submit" type="submit" class="btn btn-primary image-submit" value="Post">
           </form>
       </div>
     </div>
@@ -112,7 +113,7 @@ var config = {
     projectId: "web-app-testing-3309d",
     storageBucket: "web-app-testing-3309d.appspot.com",
     messagingSenderId: "832434382294"
-  };
+};
 
 let app = firebase.initializeApp(config);
 
@@ -120,8 +121,40 @@ let db = app.database();
 
 let usersRef = db.ref('user');
 let postsRef = db.ref('posts');
-let postContentRef = db.ref('postcontent')
+let postContentRef = db.ref('postcontent');
 let userTweetsRef = db.ref('userTweets');
+
+// Reference for Media Upload
+let imageStoreRef = firebase.storage().ref();
+
+// upload image to firestore update media field
+        setTimeout(function(){
+          console.log("Trying to upload a file!");
+
+        var selectedFile;
+        function handleFileUploadChange(e) {
+              console.log("go into change handler");
+              selectedFile = e.target.files[0];
+            }
+
+            function handleFileUploadSubmit(e) {
+              console.log("go into submit handler");
+              var uploadTask = imageStoreRef.child('images/${selectedFile.name}').put(selectedFile);
+              uploadTask.on('state_changed', (snapshot) => {
+              // Observe state change events such as progress, pause, and resume
+              }, (error) => {
+                // Handle unsuccessful uploads
+                console.log("upload error: " + error);
+              }, () => {
+                // Do something once upload is complete
+                console.log('success');
+              });
+            }
+
+            document.querySelector(".image-select").addEventListener("change", handleFileUploadChange);
+            document.querySelector(".image-submit").addEventListener("click", handleFileUploadSubmit);
+
+        }, 10000);
 
 var currentUser = "";
 var currentUserID = "";
@@ -325,7 +358,11 @@ export default {
 
       console.log(currentUserID);
       this.newArticle.userId = "" + currentUserID + "";
+
       if(this.checkForm(event) == true){
+
+        
+
         var newPost = postsRef.push(this.newArticle);
         var postId = newPost.key;
         this.newPostContent.postId = postId;
@@ -411,55 +448,6 @@ export default {
         };
         callback();
       });
-    },
-
-     /**
-     * Has changed
-     * @param  Object|undefined   newFile   Read only
-     * @param  Object|undefined   oldFile   Read only
-     * @return undefined
-     */
-    inputFile: function (newFile, oldFile) {
-      if (newFile && oldFile && !newFile.active && oldFile.active) {
-        // Get response data
-        console.log('response', newFile.response)
-        if (newFile.xhr) {
-          //  Get the response status code
-          console.log('status', newFile.xhr.status)
-        }
-      }
-    },
-    /**
-     * Pretreatment
-     * @param  Object|undefined   newFile   Read and write
-     * @param  Object|undefined   oldFile   Read only
-     * @param  Function           prevent   Prevent changing
-     * @return undefined
-     */
-    inputFilter: function (newFile, oldFile, prevent) {
-      if (newFile && !oldFile) {
-        // Filter non-image file
-        if (!/\.(jpeg|jpe|jpg|gif|png|webp)$/i.test(newFile.name)) {
-          return prevent()
-        }
-      }
-
-      // Filter system files or hide files
-      if (/(\/|^)(Thumbs\.db|desktop\.ini|\..+)$/.test(newFile.name)) {
-        return prevent()
-      }
-
-      // Filter php html js file
-      if (/\.(php5?|html?|jsx?)$/i.test(newFile.name)) {
-        return prevent()
-      }
-
-      // Create a blob field
-      newFile.blob = ''
-      let URL = window.URL || window.webkitURL
-      if (URL && URL.createObjectURL) {
-        newFile.blob = URL.createObjectURL(newFile.file)
-      }
     }
   }
 }
