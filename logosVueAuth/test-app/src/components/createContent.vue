@@ -291,7 +291,7 @@ export default {
               inDB = true;
             }
           });
-          console.log(inDB);
+          //console.log(inDB);
           if(!inDB){
             $this.addUser(userObject, currentUserID);
           }
@@ -306,7 +306,7 @@ export default {
       var toReturn = "Anon";
       usersRef.on('value', function(snapshot) {
         snapshot.forEach(function(users){
-          console.log(users.val());
+          //console.log(users.val());
           if(users.val().socialId == userId){
             //console.log("1: " + userId);
             //console.log("2: " + users.val().socialId)
@@ -323,10 +323,10 @@ export default {
       postContentRef.on('value', function(snapshot) {
         snapshot.forEach(function(pContent){
           if(pContent.val().postId == inputPostId){
-            console.log(inputPostId);
-            console.log(pContent.key);
-            console.log("1: " + inputPostId);
-            console.log("2: " + pContent.val().postId)
+            //console.log(inputPostId);
+            //console.log(pContent.key);
+            //console.log("1: " + inputPostId);
+            //console.log("2: " + pContent.val().postId)
             toReturn = pContent.val().content;
           } else {
             toReturn = "Nothing to see here";
@@ -358,30 +358,30 @@ export default {
       this.newArticle.createdOn = now.toString();
 
       //sanitize inputs
-      console.log("Old location: " + location);
+      //console.log("Old location: " + location);
       var encodedLocation = this.$sanitize(location);
       var decodedLocation = encodedLocation.replace(/&amp;/g, '&');
       if(decodedLocation == "Enter a location." || decodedLocation.trim() == ""){
         decodedLocation = "Location unknown";
       }
       this.newArticle.location = decodedLocation;
-      console.log("New location: " + this.newArticle.location);
+      //console.log("New location: " + this.newArticle.location);
 
-      console.log("Old title: " + this.newArticle.title);
+      //console.log("Old title: " + this.newArticle.title);
       var encodedTitle = this.$sanitize(this.newArticle.title);
       var decodedTitle = encodedTitle.replace(/&amp;/g, '&');
       this.newArticle.title = decodedTitle;
-      console.log("New title: " + this.newArticle.title);
+      //console.log("New title: " + this.newArticle.title);
 
-      console.log("Old body: " + this.newPostContent.content);
+      //console.log("Old body: " + this.newPostContent.content);
       var backToTags = underscore.unescape(this.newPostContent.content);
       this.newPostContent.content = this.$sanitize(backToTags);
-      console.log("New body: " + this.newPostContent.content);
+      //console.log("New body: " + this.newPostContent.content);
 
-      console.log(this.newArticle.title.length);
-      console.log(this.newPostContent.content.length);
+      //console.log(this.newArticle.title.length);
+      //console.log(this.newPostContent.content.length);
 
-      console.log(currentUserID);
+      console.log("UID: "+ currentUserID);
       this.newArticle.userId = "" + currentUserID + "";
 
       if(this.checkForm(event) == true){
