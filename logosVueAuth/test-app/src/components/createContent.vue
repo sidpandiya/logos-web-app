@@ -72,8 +72,7 @@
             <tr v-for="(post, key) in posts" >
               <td >{{ post.title }}</td>
               <td v-for="pair in nameArticlePairs" v-if="pair.iD == post.userId">{{ pair.name }}</td>
-
-              <td v-for="pContent in postContent" v-if="pContent.postId == post['.key']" >{{ pContent.content }}</td>
+              <td v-for="pContent in postContent" v-if="pContent.postId == post['.key']" v-html="pContent.content">{{ pContent.content }}</td>
               <td>{{ post.city + ", " + post.country }}</td>
               <td>{{ post.createdOn }}</td>
               <td>{{ post.views }}</td>
@@ -147,7 +146,6 @@ setTimeout(function(){
 
 var currentUser = "";
 var currentUserID = "";
-
 var currame = "";
 
 export default {
@@ -238,11 +236,6 @@ export default {
   },
   mounted() {
     this.geolocateInitial(this.checkUser);
-    //postsRef.once('value', function(snapshot) {
-    //  snapshot.forEach(function(childSnapshot) {
-    //    console.log(childSnapshot.key);
-    //  });
-    //});
   },
   methods: {
     addUser: function(userObject, userId){
