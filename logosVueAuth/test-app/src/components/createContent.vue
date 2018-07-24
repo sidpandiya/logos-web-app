@@ -97,12 +97,12 @@ require('firebase/auth');
 require('firebase/database');
 
 var config = {
-    apiKey: "AIzaSyCA5R7pUDrcpBbhxQ1dk4jLeeZiwl7sV3c",
-    authDomain: "web-app-testing-3309d.firebaseapp.com",
-    databaseURL: "https://web-app-testing-3309d.firebaseio.com",
-    projectId: "web-app-testing-3309d",
-    storageBucket: "web-app-testing-3309d.appspot.com",
-    messagingSenderId: "832434382294"
+    apiKey: "AIzaSyDLkhd593mb00bYme_pfqqHGZEFtiC8c4I",
+    authDomain: "web-app-testing-mobiledb.firebaseapp.com",
+    databaseURL: "https://web-app-testing-mobiledb.firebaseio.com",
+    projectId: "web-app-testing-mobiledb",
+    storageBucket: "web-app-testing-mobiledb.appspot.com",
+    messagingSenderId: "461364962866"
 };
 
 let app = firebase.initializeApp(config);
@@ -385,6 +385,9 @@ export default {
       var backToTags = underscore.unescape(this.newPostContent.content);
       var str = this.$sanitize(backToTags);
       var result = str.match( /[^\.!\?]+[\.!\?]+/g );
+      if(result == null){
+        result = str;
+      }
       //console.log("New body: " + this.newPostContent.content);
 
       //console.log(this.newArticle.title.length);
