@@ -148,6 +148,17 @@ var currentUser = "";
 var currentUserID = "";
 var currame = "";
 
+firebase.auth().onAuthStateChanged((function(user) {
+  if (user) {
+    currentUser = user.displayName;
+    currentUserID = user.uid;
+    console.log(currentUserID);
+
+  } else {
+    // No user is signed in.
+  }
+}));
+
 export default {
   name: 'create',
   firebase: {
@@ -259,7 +270,7 @@ export default {
           userObject = user;
           currentUser = user.displayName;
           currentUserID = user.uid;
-          //console.log(currentUserID)
+          console.log(currentUserID)
 
           usersRef.orderByChild("socialId").equalTo(currentUserID).on('value', function(snapshot) {
             if (snapshot.exists()) {
