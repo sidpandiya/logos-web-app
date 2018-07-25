@@ -119,30 +119,10 @@ let imageStoreRef = firebase.storage().ref();
 // upload image to firestore update media field
 // this is very "hacky" as if the setTimout starts executing the function before
 // the page loads, the event listener will not be attached to the respective DOM elements
-setTimeout(function(){
-  console.log("Trying to upload a file!");
-  var selectedFile;
-  function handleFileUploadChange(e) {
-    console.log("go into change handler");
-    selectedFile = e.target.files[0];
-  }
-
-  function handleFileUploadSubmit(e) {
-    console.log("go into submit handler");
-    var uploadTask = imageStoreRef.child('images/${selectedFile.name}').put(selectedFile);
-    uploadTask.on('state_changed', (snapshot) => {
-    // Observe state change events such as progress, pause, and resume
-    }, (error) => {
-      // Handle unsuccessful uploads
-      console.log("upload error: " + error);
-    }, () => {
-      // Do something once upload is complete
-      console.log('success');
-    });
-  }
-  document.querySelector(".image-select").addEventListener("change", handleFileUploadChange);
-  document.querySelector(".image-submit").addEventListener("click", handleFileUploadSubmit);
-}, 10000);
+// setTimeout(function(){ 
+//   document.querySelector(".image-select").addEventListener("change", handleFileUploadChange);
+//   document.querySelector(".image-submit").addEventListener("click", handleFileUploadSubmit);
+// }, 10000);
 
 var currentUser = "";
 var currentUserID = "";
@@ -300,7 +280,7 @@ export default {
             return toReturn;
           } 
           
-        })
+        });
       });
       return toReturn;
     },
@@ -373,6 +353,33 @@ export default {
       this.newArticle.userId = "" + currentUserID + "";
 
       if(this.checkForm(event) == true){
+        console.log("Trying to upload a file!");
+        var selectedFile = document.querySelector(".image-select").files[0];
+
+        console.log("go into submit handler");
+        var uploadTask = imageStoreRef.child('images/' + selectedFile.name).put(selectedFile);
+        uploadTask.on('state_changed', (snapshot) => {
+        // Observe state change events such as progress, pause, and resume
+        }, (error) => {
+          // Handle unsuccessful uploads
+          console.log("upload error: " + error);
+        }, () => {
+          // Do something once upload is complete
+          console.log("success");
+        });
+
+        var urlString = "";
+
+        imageStoreRef.child("images/" + selectedFile.name).getDownloadURL().then(function(url) {
+          urlString = url;
+        });
+
+        setTimeout(function(){
+          console.log("media update url: " + urlString);
+        }, 5000);
+
+        this.newArticle.media = urlString;
+
         var newPost = postsRef.push(this.newArticle);
         var postId = newPost.key;
         this.newPostContent.postId = postId;
