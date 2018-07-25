@@ -364,10 +364,8 @@ export default {
       //console.log("Old body: " + this.newPostContent.content);
       var backToTags = underscore.unescape(this.newPostContent.content);
       var str = this.$sanitize(backToTags);
-      var result = str.match( /[^\.!\?]+[\.!\?]+/g );
-      if(result == null){
-        result = str;
-      }
+      var result = str.replace(/\.\s+/g,'.|').replace(/\?\s/g,'?|').replace(/\!\s/g,'!|').split("|");
+      
       //console.log("New body: " + this.newPostContent.content);
 
       //console.log(this.newArticle.title.length);
@@ -378,7 +376,8 @@ export default {
 
       if(this.checkForm(event) == true){
           var $this = this;
-          if(document.getElementById("photo").files.length > 0){console.log("Trying to upload a file!");
+          if(document.getElementById("photo").files.length > 0){
+            console.log("Trying to upload a file!");
             var selectedFile = document.querySelector(".image-select").files[0];
   
             console.log("go into submit handler");
@@ -420,6 +419,7 @@ export default {
               //setTimeout(function(){
               //  console.log("media update url: " + urlString);
               //}, 5000);
+              document.getElementById("photo").value = "";
           } else {
             var newPost = postsRef.push($this.newArticle);
             var postId = newPost.key;
