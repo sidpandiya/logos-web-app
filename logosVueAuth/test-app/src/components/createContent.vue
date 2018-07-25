@@ -377,49 +377,68 @@ export default {
       this.newArticle.userId = "" + currentUserID + "";
 
       if(this.checkForm(event) == true){
-        console.log("Trying to upload a file!");
-        var selectedFile = document.querySelector(".image-select").files[0];
+          var $this = this;
+          if(document.getElementById("photo").files.length > 0){console.log("Trying to upload a file!");
+            var selectedFile = document.querySelector(".image-select").files[0];
+  
+            console.log("go into submit handler");
+            var uploadTask = imageStoreRef.child('images/' + selectedFile.name).put(selectedFile);
+            uploadTask.on('state_changed', (snapshot) => {
+            // Observe state change events such as progress, pause, and resume
+            }, (error) => {
+              // Handle unsuccessful uploads
+              console.log("upload error: " + error);
+            }, () => {
+              // Do something once upload is complete
+              console.log("success");
+              var urlString = "";
+  
+              imageStoreRef.child("images/" + selectedFile.name).getDownloadURL().then(function(url) {
+                urlString = url;
+                $this.newArticle.media = urlString;
+  
+                var newPost = postsRef.push($this.newArticle);
+                var postId = newPost.key;
+                for(var i = 0; i<result.length; i++){
+                  $this.newPostContent.postId = postId;
+                  $this.newPostContent.content = result[i];
+                  postContentRef.push($this.newPostContent);
+                  $this.newPostContent.postId = '';
+                  $this.newPostContent.content = '';
+                }
+  
+                $this.newArticle.title = '';
+                $this.newArticle.media = '';
+                $this.newArticle.city = "N/A";
+                $this.newArticle.country = "N/A";
+                $this.newArticle.createdOn = '';
+              });
+            });
+  
+              
+  
+              //setTimeout(function(){
+              //  console.log("media update url: " + urlString);
+              //}, 5000);
+          } else {
+            var newPost = postsRef.push($this.newArticle);
+            var postId = newPost.key;
+            for(var i = 0; i<result.length; i++){
+              $this.newPostContent.postId = postId;
+              $this.newPostContent.content = result[i];
+              postContentRef.push($this.newPostContent);
+              $this.newPostContent.postId = '';
+              $this.newPostContent.content = '';
+            }
 
-        console.log("go into submit handler");
-        var uploadTask = imageStoreRef.child('images/' + selectedFile.name).put(selectedFile);
-        uploadTask.on('state_changed', (snapshot) => {
-        // Observe state change events such as progress, pause, and resume
-        }, (error) => {
-          // Handle unsuccessful uploads
-          console.log("upload error: " + error);
-        }, () => {
-          // Do something once upload is complete
-          console.log("success");
-        });
-
-        var urlString = "";
-
-        imageStoreRef.child("images/" + selectedFile.name).getDownloadURL().then(function(url) {
-          urlString = url;
-        });
-
-        setTimeout(function(){
-          console.log("media update url: " + urlString);
-        }, 5000);
-
-        this.newArticle.media = urlString;
-
-        var newPost = postsRef.push(this.newArticle);
-        var postId = newPost.key;
-        for(var i = 0; i<result.length; i++){
-          this.newPostContent.postId = postId;
-          this.newPostContent.content = result[i];
-          postContentRef.push(this.newPostContent);
-          this.newPostContent.postId = '';
-          this.newPostContent.content = '';
-        }
-
-        this.newArticle.title = '';
-        this.newArticle.media = '';
-        this.newArticle.city = "N/A";
-        this.newArticle.country = "N/A";
-        this.newArticle.createdOn = '';
+            $this.newArticle.title = '';
+            $this.newArticle.media = '';
+            $this.newArticle.city = "N/A";
+            $this.newArticle.country = "N/A";
+            $this.newArticle.createdOn = '';
+          }
       }
+        
     },
     logOut() { 
         firebase.auth().signOut();
