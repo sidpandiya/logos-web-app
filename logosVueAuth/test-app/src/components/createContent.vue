@@ -316,7 +316,7 @@ export default {
         snapshot.forEach(function(pContent){
           if(pContent.val().postId == pId){
             //console.log(pContent.val().content)
-            toReturn = toReturn + pContent.val().content;
+            toReturn = toReturn + " " + pContent.val().content;
           }
         })
       });
@@ -361,12 +361,14 @@ export default {
       this.newArticle.title = decodedTitle;
       //console.log("New title: " + this.newArticle.title);
 
-      //console.log("Old body: " + this.newPostContent.content);
+      console.log("Old body: " + this.newPostContent.content);
       var backToTags = underscore.unescape(this.newPostContent.content);
       var str = this.$sanitize(backToTags);
-      var result = str.replace(/\.\s+/g,'.|').replace(/\?\s/g,'?|').replace(/\!\s/g,'!|').split("|");
+      var result = str.replace(/\.+/g,'.|').replace(/\?/g,'?|').replace(/\!/g,'!|').split("|");
+      console.log(result);
       
-      //console.log("New body: " + this.newPostContent.content);
+      console.log("Proto body: " + backToTags);
+      console.log("New body: " + str);
 
       //console.log(this.newArticle.title.length);
       //console.log(this.newPostContent.content.length);
@@ -386,7 +388,7 @@ export default {
             // Observe state change events such as progress, pause, and resume
             }, (error) => {
               // Handle unsuccessful uploads
-              console.log("upload error: " + error);
+              console.log("upload error: " + JSON.stringify(error));
             }, () => {
               // Do something once upload is complete
               console.log("success");

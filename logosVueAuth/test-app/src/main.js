@@ -14,7 +14,6 @@ import underscore from 'vue-underscore';
 Vue.use(VueGeolocation);
 Vue.use(VueRouter);
 Vue.use(VueFire);
-Vue.use(VueSanitize, defaultOptions);
 Vue.use(underscore);
 Vue.use(VueGoogleMaps, {
   load: {
@@ -24,12 +23,30 @@ Vue.use(VueGoogleMaps, {
 });
 var defaultOptions = {
   allowedTags: ['h3', 'h4', 'h5', 'h6', 'blockquote', 'p', 'a', 'ul', 'ol',
-    'nl', 'li', 'b', 'i', 'u', 'strong', 'em', 'strike', 'code', 'hr', 'br', 'div',
-    'table', 'thead', 'caption', 'tbody', 'tr', 'th', 'td', 'pre', 's'],
+    'nl', 'li', 'b', 'i', 's', 'strong', 'em', 'strike', 'code', 'hr', 'br', 'div',
+    'table', 'thead', 'caption', 'tbody', 'tr', 'th', 'td', 'pre', 'u', 'span'],
   allowedAttributes: {
-    'a': [ 'href' ]
+    'a': [ 'href', 'style' ],
+    'p': [ 'href', 'style' ],
+    'span': [ 'href', 'style' ],
+    'ul': [ 'data-checked' ]
+  },
+  allowedStyles: {
+    '*': {
+      // Match HEX and RGB
+      'color': [/^\#(0x)?[0-9a-f]+$/i, /^rgb\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*\)$/],
+      'background-color': [/^\#(0x)?[0-9a-f]+$/i, /^rgb\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*\)$/],
+      'text-align': [/^left$/, /^right$/, /^center$/],
+      // Match any number with px, em, or %
+      'font-size': [/^\d+(?:px|em|%)$/]
+    },
+    'p': {
+      'font-size': [/^\d+rem$/]
+    }
   }
 }
+
+Vue.use(VueSanitize, defaultOptions);
 
 new Vue({
   router,
