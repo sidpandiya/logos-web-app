@@ -4,6 +4,8 @@
   <div id="firebaseui-auth-container"></div>
 </template>
 
+<script src="https://www.gstatic.com/firebasejs/ui/3.2.0/firebase-ui-auth__en.js"></script>
+
 <script>
   import firebase from 'firebase';
   import firebaseui from 'firebaseui'
