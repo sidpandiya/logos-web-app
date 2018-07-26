@@ -2,7 +2,7 @@
 
 <template lang="html">
   <head>
-    <script src="https://www.gstatic.com/firebasejs/ui/3.2.0/firebase-ui-auth__{LANGUAGE_CODE}.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/ui/3.2.0/firebase-ui-auth__en.js"></script>
     <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/3.2.0/firebase-ui-auth.css" />
   </head>
   <div id="firebaseui-auth-container"></div>
