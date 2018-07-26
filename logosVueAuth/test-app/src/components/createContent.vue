@@ -97,12 +97,12 @@ require('firebase/auth');
 require('firebase/database');
 
 var config = {
-    apiKey: "AIzaSyDLkhd593mb00bYme_pfqqHGZEFtiC8c4I",
-    authDomain: "web-app-testing-mobiledb.firebaseapp.com",
-    databaseURL: "https://web-app-testing-mobiledb.firebaseio.com",
-    projectId: "web-app-testing-mobiledb",
-    storageBucket: "web-app-testing-mobiledb.appspot.com",
-    messagingSenderId: "461364962866"
+    apiKey: "AIzaSyD57NYPtxbNb6qnSOo7lg0mtD-id7Da0hw",
+    authDomain: "logos-app-915d7.firebaseapp.com",
+    databaseURL: "https://logos-app-915d7.firebaseio.com",
+    projectId: "logos-app-915d7",
+    storageBucket: "logos-app-915d7.appspot.com",
+    messagingSenderId: "112244798411"
 };
 
 let app = firebase.initializeApp(config);
