@@ -1,9 +1,6 @@
 <!-- LOGIN VIEW -->
 
 <template lang="html">
-  <head>
-    <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/3.2.0/firebase-ui-auth.css" />
-  </head>
   <div id="firebaseui-auth-container"></div>
 </template>
 
