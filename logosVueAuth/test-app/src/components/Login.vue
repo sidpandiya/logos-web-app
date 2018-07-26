@@ -28,8 +28,10 @@
 
 <style>
 
-
 #firebaseui-auth-container{
+  min-width: 500px;
+  max-width: 700px;
+  min-height: 200px;
   position: fixed;
   top: 50%;
   left: 50%;
@@ -40,6 +42,7 @@
 
 .centered{
   display: none;
+  font-family: "Roboto","Helvetica","Arial",sans-serif;
   font-size: 24px; 
   padding-top: 10%; 
 }
@@ -49,7 +52,7 @@
   max-width: 700px;
   min-height: 200px;
   border-radius: 15px;
-  box-shadow: 2px 3px 1px #D3D3D3;
+  box-shadow: 0 0 0 0.5px #D3D3D3;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -60,8 +63,10 @@
   text-align: center;
 }
 
-.firebaseui-card-content{
-
+.firebaseui-card-content, firebaseui-container, .firebaseui-page-provider-sign-in, .firebaseui-id-page-provider-sign-in, form{
+  min-width: 500px;
+  max-width: 700px;
+  min-height: 200px;
 }
 
 .firebaseui-idp-icon{
