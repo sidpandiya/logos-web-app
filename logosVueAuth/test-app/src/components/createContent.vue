@@ -5,7 +5,7 @@
   <div class="container">
     <div class="page-header">
       <h1>Post Creation Page</h1>
-      <button @click='logOut'>Log out</button>
+      <button class="btn btn-primary" @click='logOut'>Log out</button>
     </div>
     <div class="panel panel-default">
       <div class="panel-heading">
@@ -56,12 +56,12 @@
       <div class="panel-heading">
         <h3>Articles</h3>
       </div>
-      <div class="panel-body">
+      <div class="panel-body table-responsive">
         <table class="table table-striped">
           <thead>
             <tr>
               <th>Title:</th>
-              <th>Author ID:</th>
+              <th>Author:</th>
               <th>Body:</th>
               <th>Location:</th>
               <th>Date Added:</th>
@@ -70,12 +70,12 @@
           </thead>
           <tbody>
             <tr v-for="(post, key) in posts" >
-              <td >{{ post.title }}</td>
-              <td v-for="pair in nameArticlePairs" v-if="pair.piD == post.userId && pair.iD == post['.key']">{{ pair.name }}</td>
-              <td v-for="pair in nameArticlePairs" v-if="pair.iD == post['.key']" v-html="pair.body">{{ pair.body }}</td>
-              <td>{{ post.city + ", " + post.country }}</td>
-              <td>{{ post.createdOn }}</td>
-              <td>{{ post.views }}</td>
+              <td class="postTitle">{{ post.title }}</td>
+              <td class="postAuthor" v-for="pair in nameArticlePairs" v-if="pair.piD == post.userId && pair.iD == post['.key']">{{ pair.name }}</td>
+              <td class="postBody" v-for="pair in nameArticlePairs" v-if="pair.iD == post['.key']" v-html="pair.body">{{ pair.body }}</td>
+              <td class="postLocation">{{ post.city + ", " + post.country }}</td>
+              <td class="postCreated">{{ post.createdOn }}</td>
+              <td class="viewCount">{{ post.views }}</td>
             </tr>
           </tbody>
         </table>
@@ -361,14 +361,14 @@ export default {
       this.newArticle.title = decodedTitle;
       //console.log("New title: " + this.newArticle.title);
 
-      console.log("Old body: " + this.newPostContent.content);
+      //console.log("Old body: " + this.newPostContent.content);
       var backToTags = underscore.unescape(this.newPostContent.content);
       var str = this.$sanitize(backToTags);
       var result = str.replace(/\.+/g,'.|').replace(/\?/g,'?|').replace(/\!/g,'!|').split("|");
-      console.log(result);
+      //console.log(result);
       
-      console.log("Proto body: " + backToTags);
-      console.log("New body: " + str);
+      //console.log("Proto body: " + backToTags);
+      //console.log("New body: " + str);
 
       //console.log(this.newArticle.title.length);
       //console.log(this.newPostContent.content.length);
@@ -379,10 +379,10 @@ export default {
       if(this.checkForm(event) == true){
           var $this = this;
           if(document.getElementById("photo").files.length > 0){
-            console.log("Trying to upload a file!");
+            //console.log("Trying to upload a file!");
             var selectedFile = document.querySelector(".image-select").files[0];
   
-            console.log("go into submit handler");
+            //console.log("go into submit handler");
             var uploadTask = imageStoreRef.child('images/' + selectedFile.name).put(selectedFile);
             uploadTask.on('state_changed', (snapshot) => {
             // Observe state change events such as progress, pause, and resume
@@ -530,16 +530,49 @@ export default {
     height: 200px;
   }
 
-  form {
+  form, .page-header, .panel-heading, .table {
     padding-left: 5%;
     padding-right: 5%;
   }
 
-  #submit {
+  #submit, .form-group {
     margin-bottom: 2%;
   }
 
   #findLocation {
     padding-bottom: 2%;
   }
+
+  .viewCount{
+    width: 5%;
+    text-align: center;
+  }
+
+  td{
+    padding: 5px;
+  }
+
+  .postTitle{
+    width: 15%;
+
+  }
+
+  .postAuthor{
+    text-align: center;
+  }
+
+  .postBody{
+    width: 40%;
+  }
+
+  .postLocation{
+    text-align: center;
+
+  }
+
+  .postCreated{
+    width: 10%;
+    text-align: center;
+  }
+
 </style>

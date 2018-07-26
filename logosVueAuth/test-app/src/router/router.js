@@ -9,7 +9,7 @@ const router = new VueRouter({
     { path: '/', component: Login },
     { path: '/login', component: Login },
     { path: '/create', component: createContent },
-    { path: 'upload/post', component: createContent}
+    //{ path: 'upload/post', component: createContent}
   ]
 });
 export default router;
